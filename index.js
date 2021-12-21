@@ -114,6 +114,15 @@ const run = async () => {
       res.json(meals)
     })
 
+    // Getting deposit by Network 
+    app.get('/deposit/:email', async(req, res) =>{
+      const email = req.params.email;
+      console.log(email)
+      const cursor = depositCollection.find({network: email});
+      const deposit = await cursor.toArray()
+      res.json(deposit)
+    })
+
 
     // Getting Single User 
     app.get('/userdata/:email', async(req, res) =>{
