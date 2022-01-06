@@ -1,8 +1,3 @@
-const express = require('express')
-const { MongoClient } = require('mongodb');
-const cors = require('cors')
-require('dotenv').config()
-
 const app = express()
 const port =  process.env.PORT || 3002;
 
@@ -46,8 +41,10 @@ const run = async () => {
     app.put('/users/meal', async(req, res) => {
       const data = req.body;
       const increaseMeal = req.body.meal;
-      const result = await usersCollection.updateOne({email: data.email}, { $inc: { "meal" : increaseMeal }}, {upsert: true})
+      const lastMealUpdate = req.body.date;
+      const result = await usersCollection.updateOne({email: data.email}, { $inc: { "meal" : increaseMeal }, $set: {'lastMealUpdate': lastMealUpdate, 'lastMealCount': increaseMeal} }, {upsert: true})
       res.json(result)
+      res.send(lastMealUpdate)
     })
 
     // Entry All Meals 
@@ -114,6 +111,13 @@ const run = async () => {
       res.json(meals)
     })
 
+    app.delete('/meals/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id:ObjectId(id) }
+      const result = await mealCollection.deleteOne(query)
+      res.json(result)
+  })
+
     // Getting deposit by Network 
     app.get('/deposit/:email', async(req, res) =>{
       const email = req.params.email;
@@ -122,6 +126,13 @@ const run = async () => {
       const deposit = await cursor.toArray()
       res.json(deposit)
     })
+    app.delete('/deposits/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id:ObjectId(id) }
+      console.log(query)
+      const result = await depositCollection.deleteOne(query)
+      res.json(result)
+  })
 
 
     // Getting Single User 
@@ -150,6 +161,15 @@ const run = async () => {
       const goods = await cursor.toArray()
       res.json(goods)
     })
+
+    app.delete('/goods/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id:ObjectId(id) }
+      console.log(query)
+      const result = await marketCollection.deleteOne(query)
+      res.json(result)
+  })
+
     // Getting User Role 
     app.get('/users/role/:email', async(req, res) => {
       const email = req.params.email;
